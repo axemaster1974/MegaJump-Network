@@ -4,6 +4,7 @@ import pygame, sys, time, random
 from pygame.locals import *
 from pyglet import clock
 from gameFunc import *
+from networking import *
 
 # set up pygame
 pygame.init()
@@ -33,7 +34,7 @@ HPNUMBER = 20                   # Hard platform number
 GPNUMBER = 50                   # Mega platform number
 IPNUMBER = 100                  # Insane platform number
 SPHEIGHT = 20                   # Standard platform height
-IPHEIGHT = 10                   # Insane platform height
+IPHEIGHT = 10                   # Insane platform height2
 SRADIUS = 16                    # Standard ball radius
 IRADIUS = 8                     # Insane ball radius
 ACC = 1200                      # y axis downward acceleration rate (to mimic gravity)
@@ -48,6 +49,8 @@ BALLCOLOUR = RED
 SCOREPLAT = 1                   # Score for landing on platform
 BACKGROUND = "background2.jpg"  # Background Image
 iball = {'x': 50, 'y': 50, 'dir': "RIGHT", 'vel': 50} # Introduction ball data structure
+role = "solo"                   # Initial game role
+insane = "False"
 
 # Ensure loadedGame and savedGames defined even if Saved Games option not selected:
 loadedGame = {} # Empty dictionary
@@ -62,6 +65,7 @@ JUMP = "Jump1.ogg"
 MEGAJUMP = "MegaJump.ogg"
 BGMUSIC = "Two Finger Johnny.ogg"
 INSANEWIN = "Tada.ogg"
+LOSE = "Lose1.ogg"
 
 # set up music
 pygame.mixer.music.load(BGMUSIC)
@@ -72,6 +76,7 @@ winSound = pygame.mixer.Sound(WIN)
 jumpSound = pygame.mixer.Sound(JUMP)
 megaSound = pygame.mixer.Sound(MEGAJUMP)
 insaneWinSound = pygame.mixer.Sound(INSANEWIN)
+loseSound = pygame.mixer.Sound(LOSE)
 
 # Main Loop
 while True:
@@ -88,14 +93,17 @@ while True:
     ################## Start Screen #######################
 
     while True:
-        
+
+        if role == "client":
+            break
+
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
 
         windowSurface.blit(background_image, background_position)
-        titleScreen(windowSurface, WWIDTH)
+        titleScreen(windowSurface, WWIDTH, role)
 
         # Intro ball
         
@@ -131,10 +139,15 @@ while True:
                 if loadedGame:
                     break
         if pygame.key.get_pressed()[ord('3')]:
+            (role, socket) = networkScreen1(windowSurface, WWIDTH, FRAMES, background_image, background_position, role)
+        if pygame.key.get_pressed()[ord('4')]:
             instructionScreen(windowSurface, WWIDTH, FRAMES, background_image, background_position)
 
+        if role == "client":
+            break
+
         if savedMessage:
-            displayText(windowSurface, 24, WWIDTH / 2, 600, savedMessage, RED)        
+            displayText(windowSurface, 24, WWIDTH / 2, 400, savedMessage, RED)
 
         pygame.display.flip()
 
@@ -154,9 +167,12 @@ while True:
 
         if loadedGame:
             break
+
+        if role == "client":
+            break
         
         windowSurface.blit(background_image, background_position)
-        introScreen1(windowSurface, WWIDTH)
+        introScreen1(windowSurface, WWIDTH, role)
         
         insane = False
         
@@ -205,14 +221,17 @@ while True:
         
         if insane:
             break
+
+        if role == "client":
+            break
                             
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-                
+
         windowSurface.blit(background_image, background_position)
-        introScreen2(windowSurface, WWIDTH)
+        introScreen2(windowSurface, WWIDTH, role)
                 
         if pygame.key.get_pressed()[ord('1')]:
             PNUMBER = EPNUMBER
@@ -242,10 +261,18 @@ while True:
 
     time.sleep(0.3)
 
+    ################# Client Wait Screen ###########################
+
+    if role == "client":
+        role = clientScreen(socket, windowSurface, WWIDTH, FRAMES, background_image, background_position)
+    if role == "server":
+        sendData(socket, "Starting")
+
     ################## Pre-Game Initialization #####################
 
     bestTime = 0
     rects = []
+    won = True  # Set to true intially so game variables are initialized on first run
 
     # Populate game variables from loaded game
     if loadedGame:
@@ -261,22 +288,66 @@ while True:
         coordsList = COORDS.split('-')
         for n in range(PNUMBER):
             rects.append({'rect': pygame.Rect(int(coordsList[n-1].split(':')[0]), int(coordsList[n-1].split(':')[1]), PWIDTH, PHEIGHT), 'visited': False, 'colour': BLUE})
-            
+
+    # Create platform data structures if new game
+    if not role == "client":
+        if not loadedGame:
+            for n in range(PNUMBER):
+                rects.append({'rect': pygame.Rect(random.randint(0, (WWIDTH - PWIDTH)), random.randint(0, (WHEIGHT - PHEIGHT)), PWIDTH, PHEIGHT), 'visited': False, 'colour': BLUE})
+
+    ##### Level data exchange if network play ######
+
+    # Send level data to client if server
+    if role == "server":
+        game = convertGameForSave(bestTime, "0", WWIDTH, WHEIGHT, PWIDTH, PHEIGHT, RADIUS, PNUMBER, DIFFICULTY, rects)
+        clientGameStr = str(game['record']) + "," + str(game['score']) + "," + str(game['wwidth']) + "," + str(game['wheight']) + "," + str(game['pwidth']) + "," + str(game['pheight']) + "," + str(game['radius']) + "," + str(game['pnumber']) + "," + game['difficulty'] + "," + str(game['coords'])
+        sendData(socket, clientGameStr)
+
+    # Receive level data from server if client
+    if role == "client":
+        loadedGameStr = receiveData(socket)
+        (record, score, wwidth, wheight, pwidth, pheight, radius, pnumber, difficulty, coords) = loadedGameStr.split(',')
+        loadedGame = {'record': record, 'score': score, 'wwidth': wwidth, 'wheight': wheight, 'pwidth': pwidth,
+                      'pheight': pheight, 'radius': radius, 'pnumber': pnumber, 'difficulty': difficulty,
+                      'coords': coords}
+
+        bestTime = int(loadedGame['record'])
+        WWIDTH = int(loadedGame['wwidth'])
+        WHEIGHT = int(loadedGame['wheight'])
+        PWIDTH = int(loadedGame['pwidth'])
+        PHEIGHT = int(loadedGame['pheight'])
+        RADIUS = int(loadedGame['radius'])
+        PNUMBER = int(loadedGame['pnumber'])
+        DIFFICULTY = loadedGame['difficulty']
+        COORDS = loadedGame['coords']
+        coordsList = COORDS.split('-')
+        rects = []                          # Empty rects array before client creates rects array from server data
+        for n in range(PNUMBER):
+            rects.append({'rect': pygame.Rect(int(coordsList[n - 1].split(':')[0]),
+                                              int(coordsList[n - 1].split(':')[1]), PWIDTH, PHEIGHT), 'visited': False,
+                          'colour': BLUE})
+
     # set up the window again depending on selected options
     (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
 
     # Calculate y coordinate where ball should stop so rests on ground
-    GROUND = WHEIGHT - RADIUS       
-   
-    # Create platform data structures based on difficulty selected
-    if not loadedGame:
-        for n in range(PNUMBER):
-            rects.append({'rect': pygame.Rect(random.randint(0, (WWIDTH - PWIDTH)), random.randint(0, (WHEIGHT - PHEIGHT)), PWIDTH, PHEIGHT), 'visited': False, 'colour': BLUE})
+    GROUND = WHEIGHT - RADIUS
 
-    won = True      # Set to true intially so game variables are initialized on first run
-    
     pygame.mixer.music.stop()
-    
+
+    #Verify remote server ready and ensure data exchange is synced before proceeding
+    if role != "solo":
+        if role == "server":
+            sendData(socket, "READY")
+            while receiveData(socket) != "READY":
+                continue
+
+        if role == "client":
+            while receiveData(socket) != "READY":
+                continue
+            sendData(socket, "READY")
+
+
     ################### Main Game Loop #####################
     
     while True:
@@ -299,6 +370,7 @@ while True:
             restart = True                  # Game restarted? Display countdown
             record = False                  # Has a record time been set for this run?
             savedMessage = ""               # Reset message advising if last save was successful
+            status = "playing"              # Game status for network play
 
             # If loaded game, define insane accordingly and set bestScore to loaded game best score
             if loadedGame:
@@ -307,7 +379,7 @@ while True:
                     bestScore = int(loadedGame['score'])
                 else:
                     insane = False
-                
+
             # Ball data structure
             ball = {'x': int(WWIDTH / 2), 'y': int(GROUND), 'xvel': 0, 'yvel': 0}
         
@@ -362,7 +434,7 @@ while True:
                 landed = False
 
         # Game exit/reset options
-        if pygame.key.get_pressed()[ord('q')]:
+        if pygame.key.get_pressed()[ord('q')] and role != "client":
             if insane:
                 displayText(windowSurface, 32, WWIDTH / 2, WHEIGHT / 2, 'Do you wish to save level? (y/n)', GREEN)
                 pygame.display.flip()
@@ -385,17 +457,19 @@ while True:
                                                    
                 clock.set_fps_limit(FRAMES)  
                 clock.tick()
-                                
+
+            status = "quit"
             finish = True
-                    
-        if pygame.key.get_pressed()[ord('r')]:
-            count = 0
-            score = 0
-            restart = True
-            ball = {'x': int(WWIDTH / 2), 'y': int(GROUND), 'xvel': 0, 'yvel': 0}
-            for rect in rects:
-                rect['visited'] = False
-                rect['colour'] = BLUE
+
+        if role == "solo":
+            if pygame.key.get_pressed()[ord('r')]:
+                count = 0
+                score = 0
+                restart = True
+                ball = {'x': int(WWIDTH / 2), 'y': int(GROUND), 'xvel': 0, 'yvel': 0}
+                for rect in rects:
+                    rect['visited'] = False
+                    rect['colour'] = BLUE
                 
         # Determine move speed
         if pygame.key.get_pressed()[pygame.K_UP]:
@@ -456,13 +530,32 @@ while True:
         # Change ball colour back to normal once ball landed after a MegaJump 
         if BALLCOLOUR == GOLD and onsurface:
             BALLCOLOUR = RED
-        
+
+        # Exchange and parse runtime player data if network play
+        if role != "solo":
+            sendData(socket, str(ball['x']) + ',' + str(ball['y']) + ',' + str(score) + ',' + status)
+            otherPlayerData = receiveData(socket)
+
+            otherPlayerX = int(otherPlayerData.split(',')[0])
+            otherPlayerY = int(otherPlayerData.split(',')[1])
+            otherPlayerScore = int(otherPlayerData.split(',')[2])
+            otherPlayerStatus = otherPlayerData.split(',')[3]
+
         # Draw window
         windowSurface.blit(background_image, background_position)
+        if role != "solo":
+            pygame.draw.circle(windowSurface, GREEN, (otherPlayerX, otherPlayerY), RADIUS, 0)
+            displayText(windowSurface, 16, WWIDTH - 75, 25, 'Network Mode', GOLD)
         pygame.draw.circle(windowSurface, BALLCOLOUR, (ball['x'], ball['y']), RADIUS, 0)
+
         for rect in rects:
             pygame.draw.rect(windowSurface, rect['colour'], rect['rect'])
-        displayText(windowSurface, 30, WWIDTH - 120, 50, 'Score: ' + str(score), GREEN)
+        if role == "solo":
+            displayText(windowSurface, 30, WWIDTH - 120, 50, 'Score: ' + str(score), GREEN)
+        else:
+            displayText(windowSurface, 24, WWIDTH - 120, 50, 'Player 1 Score: ' + str(score), GREEN)
+            displayText(windowSurface, 24, WWIDTH - 120, 90, 'Player 2 Score: ' + str(otherPlayerScore), GREEN)
+
         if not insane:
             displayText(windowSurface, 30, 90, 50, 'Time: ', GREEN)
             displayTime(windowSurface, timeElapsed, 220, 50, GREEN, 30, None)
@@ -477,14 +570,24 @@ while True:
             megaused = False
             timeElapsed = 0                 
             startTime = int(time.time() * 1000)
+
         if score == PNUMBER * SCOREPLAT:
             won = True
             if insane:
                 displayText(windowSurface, 32, WWIDTH / 2, (WHEIGHT / 2), 'MegaJump Champion!!!', GOLD)
                 insaneWinSound.play()
             else:
-                displayText(windowSurface, 32, WWIDTH / 2, (WHEIGHT / 2), 'You Finished!', GREEN)
+                if role == "solo":
+                    displayText(windowSurface, 32, WWIDTH / 2, (WHEIGHT / 2), 'You Finished!', GREEN)
+                else:
+                    displayText(windowSurface, 32, WWIDTH / 2, (WHEIGHT / 2), 'You Won!', GREEN)
                 winSound.play()
+
+        if role != "solo":
+            if otherPlayerScore == PNUMBER * SCOREPLAT:
+                won = True
+                displayText(windowSurface, 32, WWIDTH / 2, (WHEIGHT / 2), 'You got beat!', GREEN)
+                loseSound.play()
                                         
         pygame.display.flip()
 
@@ -493,9 +596,9 @@ while True:
         clock.set_fps_limit(FRAMES)
         clock.tick()
         
-        # Win rountine
+        # Win rountine for single player
         
-        if won:
+        if won and role == "solo":
             if bestTime == 0 or timeElapsedSaved < bestTime:
                 bestTime = timeElapsedSaved
                 record = True
@@ -545,6 +648,55 @@ while True:
                 continue
             else:
                 break
-            
+
+        if won and role != "solo":
+
+            time.sleep(1)
+
+            if role == "server":
+                displayText(windowSurface, 32, WWIDTH / 2, (WHEIGHT / 2) + 100, 'Play Level Again? (y/n)',
+                            GREEN)
+
+                pygame.display.flip()
+
+                # Sub loop to get user response to "Play Level Again?"
+                while True:
+                    for event in pygame.event.get():
+                        if event.type == QUIT:
+                            pygame.quit()
+                            sys.exit()
+
+                    if pygame.key.get_pressed()[ord('y')]:
+                        sendData(socket, "Restart")
+                        again = True
+                        break
+                    if pygame.key.get_pressed()[ord('n')]:
+                        sendData(socket, "NewGame")
+                        again = False
+                        break
+
+                    clock.set_fps_limit(FRAMES)
+                    clock.tick()
+
+            if role == "client":
+                serverChoice = receiveData(socket)
+                if serverChoice == "Restart":
+                    again = True
+                else:
+                    again = False
+
+            if again:
+                continue
+            else:
+                break
+
+        # If player quits mid game
+
         if finish:
             break
+
+        if role == "client":
+            if otherPlayerStatus == "quit":
+                break
+
+

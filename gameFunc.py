@@ -3,6 +3,7 @@
 import pygame, time, os, sys
 from pygame.locals import *
 from pyglet import clock
+from networking import *
 
 # Constants
 WHITE = (255, 255, 255)
@@ -174,13 +175,17 @@ def windowSetup(WWIDTH, WHEIGHT, BACKGROUND):
 
 ######### Game Screen Functions ##########
 
-def titleScreen(windowSurface, WWIDTH):
-    
+def titleScreen(windowSurface, WWIDTH, role):
+
+    if role != "solo":
+        displayText(windowSurface, 16, WWIDTH - 75, 25, 'Network Mode', GOLD)
+
     displayText(windowSurface, 128, WWIDTH / 2, 125, 'MEGA', RED)
     displayText(windowSurface, 128, WWIDTH / 2, 275, 'JUMP!', GREEN)
     displayText(windowSurface, 24, WWIDTH / 2, 450, '1 = NEW GAME', GREEN)
     displayText(windowSurface, 24, WWIDTH / 2, 500, '2 = SAVED GAMES', GREEN)
-    displayText(windowSurface, 24, WWIDTH / 2, 550, '3 = INSTRUCTIONS', GREEN)
+    displayText(windowSurface, 24, WWIDTH / 2, 550, '3 = NETWORK PLAY', GREEN)
+    displayText(windowSurface, 24, WWIDTH / 2, 600, '4 = INSTRUCTIONS', GREEN)
     
 def instructionScreen(windowSurface, WWIDTH, FRAMES, background_image, background_position):
 
@@ -210,8 +215,41 @@ def instructionScreen(windowSurface, WWIDTH, FRAMES, background_image, backgroun
 
         clock.set_fps_limit(FRAMES)
         clock.tick()
-        
-def introScreen1(windowSurface, WWIDTH):
+
+def clientScreen(socket, windowSurface, WWIDTH, FRAMES, background_image, background_position):
+
+    while True:
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+        windowSurface.blit(background_image, background_position)
+
+        displayTextLJ(windowSurface, 24, 50, 50, "Waiting for host to start new game....", GREEN)
+        displayTextLJ(windowSurface, 24, 50, 100, "Press ESC to quit network mode", RED)
+
+        pygame.display.flip()
+
+        #TODO escape not working
+        if pygame.key.get_pressed()[K_ESCAPE]:
+            role = "solo"
+            return role
+
+        #TODO crashes out if server not sent data in time (socket.timeout: timed out)
+        serverDecision = receiveData(socket)
+        if serverDecision == "Starting":
+            role = "client"
+            return role
+
+        clock.set_fps_limit(FRAMES)
+        clock.tick()
+
+def introScreen1(windowSurface, WWIDTH, role):
+
+    if role != "solo":
+        displayText(windowSurface, 16, WWIDTH - 75, 25, 'Network Mode', GOLD)
 
     displayText(windowSurface, 128, WWIDTH / 2, 125, 'MEGA', RED)
     displayText(windowSurface, 128, WWIDTH / 2, 275, 'JUMP!', GREEN)
@@ -221,7 +259,10 @@ def introScreen1(windowSurface, WWIDTH):
     displayText(windowSurface, 24, WWIDTH / 2, 550, '3 = HARD', GREEN)
     displayText(windowSurface, 24, WWIDTH / 2, 620, '4 = INSANE (Only your score matters here!)', RED)
 
-def introScreen2(windowSurface, WWIDTH):
+def introScreen2(windowSurface, WWIDTH, role):
+
+    if role != "solo":
+        displayText(windowSurface, 16, WWIDTH - 75, 25, 'Network Mode', GOLD)
 
     displayText(windowSurface, 128, WWIDTH / 2, 125, 'MEGA', RED)
     displayText(windowSurface, 128, WWIDTH / 2, 275, 'JUMP!', GREEN)
@@ -231,7 +272,52 @@ def introScreen2(windowSurface, WWIDTH):
     displayText(windowSurface, 24, WWIDTH / 2, 550, '3 = LARGE', GREEN)
     displayText(windowSurface, 24, WWIDTH / 2, 600, '4 = MEGA', RED)
 
-def savedGameScreen(savedGames, windowSurface, WWIDTH, WHEIGHT, FRAMES, background_image, background_position):        
+def networkScreen1(windowSurface, WWIDTH, FRAMES, background_image, background_position, role):
+
+    time.sleep(0.3)
+
+    while True:
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+        windowSurface.blit(background_image, background_position)
+
+        if role != "solo":
+            displayText(windowSurface, 16, WWIDTH - 75, 25, 'Network Mode', GOLD)
+
+        displayText(windowSurface, 128, WWIDTH / 2, 125, 'MEGA', RED)
+        displayText(windowSurface, 128, WWIDTH / 2, 275, 'JUMP!', GREEN)
+        displayText(windowSurface, 24, WWIDTH / 2, 400, 'Network Play:', GREEN)
+        displayText(windowSurface, 24, WWIDTH / 2, 450, '1 = Host Game', GREEN)
+        displayText(windowSurface, 24, WWIDTH / 2, 500, '2 = Connect to Game', GREEN)
+        displayText(windowSurface, 24, WWIDTH / 2, 550, '3 = Exit Network Mode', GREEN)
+        displayText(windowSurface, 20, WWIDTH / 2, 620, 'Press Esc to Return to Main Menu', RED)
+
+        if pygame.key.get_pressed()[ord('1')]:
+            clientSocket = setupServer(windowSurface, background_image, background_position)
+            if clientSocket:
+                role = "server"
+                return role, clientSocket
+        if pygame.key.get_pressed()[ord('2')]:
+            serverSocket = setupClient(windowSurface, background_image, background_position)
+            if serverSocket:
+                role = "client"
+                return role, serverSocket
+        if pygame.key.get_pressed()[ord('3')]:
+            role = "solo"
+            return role, None
+        if pygame.key.get_pressed()[K_ESCAPE]:
+            return
+
+        pygame.display.flip()
+
+        clock.set_fps_limit(FRAMES)
+        clock.tick()
+
+def savedGameScreen(savedGames, windowSurface, WWIDTH, WHEIGHT, FRAMES, background_image, background_position):
 
     time.sleep(0.3)
     
@@ -284,3 +370,4 @@ def savedGameScreen(savedGames, windowSurface, WWIDTH, WHEIGHT, FRAMES, backgrou
         clock.set_fps_limit(FRAMES)
         clock.tick()
        
+#TODO Ensure sockets closed on exit
