@@ -1,6 +1,6 @@
 # MegaJump game functions
 
-import pygame, time, os, sys
+import pygame, time, os, sys, socket
 from pygame.locals import *
 from pyglet import clock
 from networking import *
@@ -300,17 +300,21 @@ def networkScreen1(windowSurface, WWIDTH, FRAMES, background_image, background_p
             clientSocket = setupServer(windowSurface, background_image, background_position)
             if clientSocket:
                 role = "server"
-                return role, clientSocket
+            else:
+                role = "solo"
+            return role, clientSocket
         if pygame.key.get_pressed()[ord('2')]:
             serverSocket = setupClient(windowSurface, background_image, background_position)
             if serverSocket:
                 role = "client"
-                return role, serverSocket
+            else:
+                role = "solo"
+            return role, serverSocket
         if pygame.key.get_pressed()[ord('3')]:
             role = "solo"
-            return role, None
+            return role, ''
         if pygame.key.get_pressed()[K_ESCAPE]:
-            return
+            return role, ''
 
         pygame.display.flip()
 

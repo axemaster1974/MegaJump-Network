@@ -55,17 +55,27 @@ def createServerSocket(windowSurface):
         time.sleep(3)
         return
 
-def acceptClientConn(s, windowSurface):
-    try:
-        cs, addr = s.accept()     # Establish connection with client.
-        return cs, addr
-    except socket.error as err:
-        if s:
-            s.close()
-        displayTextLJ(windowSurface, 12, 50, 500, "Socket Error: " + str(err), RED)
-        pygame.display.flip()
-        time.sleep(3)
-        return None, None
+def acceptClientConn(s, windowSurface): # Establish connection with client.
+    cs = None
+    s.setblocking(0)
+
+    while not cs:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+        pygame.event.pump()
+
+        if pygame.key.get_pressed()[K_ESCAPE]:
+            return '', ''
+
+        try:
+            cs, addr = s.accept()
+        except socket.error as err:
+            pass
+
+    return cs, addr
 
 def receiveData(s):
     data = s.recv(1024).decode('utf-8')
@@ -81,6 +91,7 @@ def getServerHost(windowSurface, background_image, background_position):
 
     windowSurface.blit(background_image, background_position)
     displayTextLJ(windowSurface, 24, 50, 50, "Enter IP Address of Host Server: ", GREEN)
+    displayTextLJ(windowSurface, 20, 50, 600, 'Escape to return to previous screen', RED)
     pygame.display.flip()
 
     while True:
@@ -108,10 +119,14 @@ def getServerHost(windowSurface, background_image, background_position):
                 time.sleep(2)
                 continue
 
+        if pygame.key.get_pressed()[K_ESCAPE]:
+            return
+
         ip = ''.join(ipArray)
 
         windowSurface.blit(background_image, background_position)
         displayTextLJ(windowSurface, 24, 50, 50, "Enter IP Address of Host Server: ", GREEN)
+        displayTextLJ(windowSurface, 20, 50, 600, 'Escape to return to previous screen', RED)
         displayTextLJ(windowSurface, 24, 50, 100, ip, GREEN)
         pygame.display.flip()
 
@@ -136,10 +151,8 @@ def setupServer(windowSurface, background_image, background_position):
 
     listenerSocket = createServerSocket(windowSurface)
 
-    if not listenerSocket:
-        return
-
     displayTextLJ(windowSurface, 24, 50, 50, "Waiting for client connection...", GREEN)
+    displayTextLJ(windowSurface, 20, 50, 600, 'Escape to return to previous screen', RED)
     pygame.display.flip()
 
     clientSocket, clientAddress = acceptClientConn(listenerSocket, windowSurface)
@@ -155,6 +168,9 @@ def setupServer(windowSurface, background_image, background_position):
 def setupClient(windowSurface, background_image, background_position):
 
     serverIP = getServerHost(windowSurface, background_image, background_position)
+
+    if not serverIP:
+        return
 
     serverSocket = connectToServer(serverIP, serverPort, windowSurface)
     if serverSocket:
