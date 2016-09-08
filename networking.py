@@ -50,7 +50,7 @@ def createServerSocket(windowSurface):
     except socket.error as err:
         if s:
             s.close()
-        displayTextLJ(windowSurface, 24, 50, 500, "Socket Error: " + str(err), RED)
+        displayTextLJ(windowSurface, 12, 50, 500, "Socket Error: " + str(err), RED)
         pygame.display.flip()
         time.sleep(3)
         return
@@ -62,7 +62,7 @@ def acceptClientConn(s, windowSurface):
     except socket.error as err:
         if s:
             s.close()
-        displayTextLJ(windowSurface, 24, 50, 500, "Socket Error: " + str(err), RED)
+        displayTextLJ(windowSurface, 12, 50, 500, "Socket Error: " + str(err), RED)
         pygame.display.flip()
         time.sleep(3)
         return None, None
@@ -123,7 +123,7 @@ def connectToServer(ip, serverPort, windowSurface):
     except socket.error as err:
         if s:
             s.close()
-        displayTextLJ(windowSurface, 24, 50, 500, "Socket Error: " + str(err), RED)
+        displayTextLJ(windowSurface, 12, 50, 500, "Socket Error: " + str(err), RED)
         pygame.display.flip()
         time.sleep(3)
         return
