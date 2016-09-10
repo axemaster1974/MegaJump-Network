@@ -265,6 +265,8 @@ while True:
 
     if role == "client":
         role = clientScreen(socket, windowSurface, WWIDTH, FRAMES, background_image, background_position)
+        if role == "solo":
+            continue
     if role == "server":
         sendData(socket, "Starting")
         while receiveData(socket) != "Received":
