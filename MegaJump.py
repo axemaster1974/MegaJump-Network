@@ -140,6 +140,9 @@ while True:
                     break
         if pygame.key.get_pressed()[ord('3')]:
             (role, socket) = networkScreen1(windowSurface, WWIDTH, FRAMES, background_image, background_position, role)
+            if role == "solo":
+                if socket:
+                    socket.close()
         if pygame.key.get_pressed()[ord('4')]:
             instructionScreen(windowSurface, WWIDTH, FRAMES, background_image, background_position)
 
@@ -266,6 +269,7 @@ while True:
     if role == "client":
         role = clientScreen(socket, windowSurface, WWIDTH, FRAMES, background_image, background_position)
         if role == "solo":
+            socket.close()
             continue
     if role == "server":
         sendData(socket, "Starting")
