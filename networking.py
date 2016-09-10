@@ -10,7 +10,7 @@ GOLD = (240, 240, 20)
 
 font = 'arialbd.ttf'
 
-SOCKET_TIMEOUT = 60
+SOCKET_TIMEOUT = 10
 
 socket.setdefaulttimeout(SOCKET_TIMEOUT)
 serverHost = socket.gethostname()
@@ -112,6 +112,8 @@ def getServerHost(windowSurface, background_image, background_position):
         elif ikey == K_RETURN:
             try:
                 ipaddress.ip_address(ip)
+                displayTextLJ(windowSurface, 24, 50, 150, "Trying to connect to host... (waiting " + str(SOCKET_TIMEOUT) + " seconds)", GREEN)
+                pygame.display.flip()
                 return ip
             except ValueError as err:
                 displayTextLJ(windowSurface, 24, 50, 500, "Invalid IP Address", RED)
@@ -127,7 +129,7 @@ def getServerHost(windowSurface, background_image, background_position):
         windowSurface.blit(background_image, background_position)
         displayTextLJ(windowSurface, 24, 50, 50, "Enter IP Address of Host Server: ", GREEN)
         displayTextLJ(windowSurface, 20, 50, 600, 'Escape to return to previous screen', RED)
-        displayTextLJ(windowSurface, 24, 50, 100, ip, GREEN)
+        displayTextLJ(windowSurface, 24, 50, 100, ip, GOLD)
         pygame.display.flip()
 
 def connectToServer(ip, serverPort, windowSurface):

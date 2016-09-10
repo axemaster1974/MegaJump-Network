@@ -216,7 +216,10 @@ def instructionScreen(windowSurface, WWIDTH, FRAMES, background_image, backgroun
         clock.set_fps_limit(FRAMES)
         clock.tick()
 
-def clientScreen(socket, windowSurface, WWIDTH, FRAMES, background_image, background_position):
+def clientScreen(s, windowSurface, WWIDTH, FRAMES, background_image, background_position):
+
+    s.setblocking(0)
+    serverDecision = ""
 
     while True:
 
@@ -225,6 +228,8 @@ def clientScreen(socket, windowSurface, WWIDTH, FRAMES, background_image, backgr
                 pygame.quit()
                 sys.exit()
 
+        pygame.event.pump()
+
         windowSurface.blit(background_image, background_position)
 
         displayTextLJ(windowSurface, 24, 50, 50, "Waiting for host to start new game....", GREEN)
@@ -232,15 +237,19 @@ def clientScreen(socket, windowSurface, WWIDTH, FRAMES, background_image, backgr
 
         pygame.display.flip()
 
-        #TODO escape not working
         if pygame.key.get_pressed()[K_ESCAPE]:
             role = "solo"
             return role
 
-        #TODO crashes out if server not sent data in time (socket.timeout: timed out)
-        serverDecision = receiveData(socket)
+        try:
+            serverDecision = receiveData(s)
+        except socket.error as err:
+            pass
+
         if serverDecision == "Starting":
             role = "client"
+            sendData(s, "Received")
+            s.setblocking(1)
             return role
 
         clock.set_fps_limit(FRAMES)

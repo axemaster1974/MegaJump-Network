@@ -267,6 +267,8 @@ while True:
         role = clientScreen(socket, windowSurface, WWIDTH, FRAMES, background_image, background_position)
     if role == "server":
         sendData(socket, "Starting")
+        while receiveData(socket) != "Received":
+            continue
 
     ################## Pre-Game Initialization #####################
 
