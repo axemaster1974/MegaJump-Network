@@ -47,7 +47,7 @@ HIGHJUMPVEL = 800               # y axis upward velocity on high jump
 LOWJUMPVEL = 600                # y axis upward velocity on low jump
 BALLCOLOUR = RED
 SCOREPLAT = 1                   # Score for landing on platform
-BACKGROUND = "background2.jpg"  # Background Image
+BACKGROUND = "background1.jpg"  # Background Image
 iball = {'x': 50, 'y': 50, 'dir': "RIGHT", 'vel': 50} # Introduction ball data structure
 role = "solo"                   # Initial game role
 insane = "False"
@@ -145,6 +145,24 @@ while True:
                     socket.close()
         if pygame.key.get_pressed()[ord('4')]:
             instructionScreen(windowSurface, WWIDTH, FRAMES, background_image, background_position)
+
+        # Background change options
+        if pygame.key.get_pressed()[pygame.K_F1]:
+            BACKGROUND = "background1.jpg"
+            (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
+            continue
+        if pygame.key.get_pressed()[pygame.K_F2]:
+            BACKGROUND = "background2.jpg"
+            (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
+            continue
+        if pygame.key.get_pressed()[pygame.K_F3]:
+            BACKGROUND = "background3.jpg"
+            (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
+            continue
+        if pygame.key.get_pressed()[pygame.K_F4]:
+            BACKGROUND = "background4.jpg"
+            (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
+            continue
 
         if role == "client":
             break
