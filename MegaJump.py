@@ -152,16 +152,26 @@ while True:
             (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
             continue
         if pygame.key.get_pressed()[pygame.K_F2]:
-            BACKGROUND = "background2.jpg"
-            (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
-            continue
-        if pygame.key.get_pressed()[pygame.K_F3]:
             BACKGROUND = "background3.jpg"
             (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
             continue
+        if pygame.key.get_pressed()[pygame.K_F3]:
+            BACKGROUND = "background5.jpg"
+            (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
+            continue
         if pygame.key.get_pressed()[pygame.K_F4]:
+            BACKGROUND = "background2.jpg"
+            (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
+            continue
+        if pygame.key.get_pressed()[pygame.K_F5]:
             BACKGROUND = "background4.jpg"
             (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
+            continue
+
+        if pygame.key.get_pressed()[pygame.K_F6]:
+            BGMUSIC = "Aurora.ogg"
+            pygame.mixer.music.load(BGMUSIC)
+            pygame.mixer.music.play(-1, 0.0)
             continue
 
         if role == "client":
