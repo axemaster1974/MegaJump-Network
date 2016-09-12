@@ -139,10 +139,10 @@ while True:
                 if loadedGame:
                     break
         if pygame.key.get_pressed()[ord('3')]:
-            (role, socket) = networkScreen1(windowSurface, WWIDTH, FRAMES, background_image, background_position, role)
+            (role, s) = networkScreen1(windowSurface, WWIDTH, FRAMES, background_image, background_position, role)
             if role == "solo":
-                if socket:
-                    socket.close()
+                if s:
+                    s.close()
         if pygame.key.get_pressed()[ord('4')]:
             instructionScreen(windowSurface, WWIDTH, FRAMES, background_image, background_position)
 
@@ -282,17 +282,26 @@ while True:
 
     time.sleep(0.3)
 
-    ################# Client Wait Screen ###########################
+    ################# Client Wait Routine ###########################
 
     if role == "client":
-        role = clientScreen(socket, windowSurface, WWIDTH, FRAMES, background_image, background_position)
+        role = clientScreen(s, windowSurface, WWIDTH, FRAMES, background_image, background_position)
         if role == "solo":
-            socket.close()
+            s.close()
             continue
+
     if role == "server":
-        sendData(socket, "Starting")
-        while receiveData(socket) != "Received":
-            continue
+        try:
+            sendData(s, "Starting")
+            while receiveData(s) != "Received":
+                continue
+        except:
+            displayText(windowSurface, 24, WWIDTH / 2, 360,'Network Connection Lost, exiting network mode...', RED)
+            pygame.display.flip()
+            time.sleep(3)
+            role = "solo"
+            s.close()
+            finish = True
 
     ################## Pre-Game Initialization #####################
 
@@ -327,11 +336,11 @@ while True:
     if role == "server":
         game = convertGameForSave(bestTime, "0", WWIDTH, WHEIGHT, PWIDTH, PHEIGHT, RADIUS, PNUMBER, DIFFICULTY, rects)
         clientGameStr = str(game['record']) + "," + str(game['score']) + "," + str(game['wwidth']) + "," + str(game['wheight']) + "," + str(game['pwidth']) + "," + str(game['pheight']) + "," + str(game['radius']) + "," + str(game['pnumber']) + "," + game['difficulty'] + "," + str(game['coords'])
-        sendData(socket, clientGameStr)
+        sendData(s, clientGameStr)
 
     # Receive level data from server if client
     if role == "client":
-        loadedGameStr = receiveData(socket)
+        loadedGameStr = receiveData(s)
         (record, score, wwidth, wheight, pwidth, pheight, radius, pnumber, difficulty, coords) = loadedGameStr.split(',')
         loadedGame = {'record': record, 'score': score, 'wwidth': wwidth, 'wheight': wheight, 'pwidth': pwidth,
                       'pheight': pheight, 'radius': radius, 'pnumber': pnumber, 'difficulty': difficulty,
@@ -364,14 +373,14 @@ while True:
     #Verify remote server ready and ensure data exchange is synced before proceeding
     if role != "solo":
         if role == "server":
-            sendData(socket, "READY")
-            while receiveData(socket) != "READY":
+            sendData(s, "READY")
+            while receiveData(s) != "READY":
                 continue
 
         if role == "client":
-            while receiveData(socket) != "READY":
+            while receiveData(s) != "READY":
                 continue
-            sendData(socket, "READY")
+            sendData(s, "READY")
 
 
     ################### Main Game Loop #####################
@@ -397,6 +406,7 @@ while True:
             record = False                  # Has a record time been set for this run?
             savedMessage = ""               # Reset message advising if last save was successful
             status = "playing"              # Game status for network play
+            netFailCount = 0                # Network transmission failure count
 
             # If loaded game, define insane accordingly and set bestScore to loaded game best score
             if loadedGame:
@@ -559,9 +569,22 @@ while True:
 
         # Exchange and parse runtime player data if network play
         if role != "solo":
-            sendData(socket, str(ball['x']) + ',' + str(ball['y']) + ',' + str(score) + ',' + status)
-            otherPlayerData = receiveData(socket)
+            try:
+                sendData(s, str(ball['x']) + ',' + str(ball['y']) + ',' + str(score) + ',' + status)
+                otherPlayerData = receiveData(s)
+                netFailCount = 0
+            except:
+                netFailCount += 1
 
+            # If network connection dropped
+            if netFailCount == 60:
+                displayText(windowSurface, 24, WWIDTH / 2, (WHEIGHT / 2), 'Network Connection Lost, exiting network mode...', RED)
+                pygame.display.flip()
+                time.sleep(3)
+                finish = True
+                role = "solo"
+
+            # If network connection OK
             otherPlayerX = int(otherPlayerData.split(',')[0])
             otherPlayerY = int(otherPlayerData.split(',')[1])
             otherPlayerScore = int(otherPlayerData.split(',')[2])
@@ -622,8 +645,7 @@ while True:
         clock.set_fps_limit(FRAMES)
         clock.tick()
         
-        # Win rountine for single player
-        
+        # Win routine for single player
         if won and role == "solo":
             if bestTime == 0 or timeElapsedSaved < bestTime:
                 bestTime = timeElapsedSaved
@@ -675,10 +697,12 @@ while True:
             else:
                 break
 
+        # Win routine for network play
         if won and role != "solo":
 
             time.sleep(1)
 
+            # Win routine for network host
             if role == "server":
                 displayText(windowSurface, 32, WWIDTH / 2, (WHEIGHT / 2) + 100, 'Play Level Again? (y/n)',
                             GREEN)
@@ -693,23 +717,34 @@ while True:
                             sys.exit()
 
                     if pygame.key.get_pressed()[ord('y')]:
-                        sendData(socket, "Restart")
+                        sendData(s, "Restart")
                         again = True
                         break
                     if pygame.key.get_pressed()[ord('n')]:
-                        sendData(socket, "NewGame")
+                        sendData(s, "NewGame")
                         again = False
                         break
 
                     clock.set_fps_limit(FRAMES)
                     clock.tick()
 
+            # Win routine for network client
             if role == "client":
-                serverChoice = receiveData(socket)
-                if serverChoice == "Restart":
-                    again = True
-                else:
-                    again = False
+
+                s.setblocking(0)
+
+                while True:
+                    pygame.event.pump()
+                    try:
+                        serverChoice = receiveData(s)
+                        if serverChoice == "Restart":
+                            again = True
+                        else:
+                            again = False
+                        s.setblocking(1)
+                        break
+                    except:
+                        pass
 
             if again:
                 continue

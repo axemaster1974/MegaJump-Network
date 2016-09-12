@@ -202,7 +202,7 @@ def instructionScreen(windowSurface, WWIDTH, FRAMES, background_image, backgroun
         displayText(windowSurface, 128, WWIDTH / 2, 275, 'JUMP!', GREEN)
         displayText(windowSurface, 20, WWIDTH / 2, 400, 'Space to jump (+ down arrow for small jump, M for MegaJump)', GREEN)
         displayText(windowSurface, 20, WWIDTH / 2, 450, 'Left & Right arrows to move (+ up arrow to move faster)', GREEN)
-        displayText(windowSurface, 20, WWIDTH / 2, 500, 'Q to quit, R to reset', GREEN)
+        displayText(windowSurface, 20, WWIDTH / 2, 500, 'Q to quit, R to reset, F1-F4 to change background', GREEN)
         displayText(windowSurface, 20, WWIDTH / 2, 550, 'Only 1 MegaJump per game!', RED)
         displayText(windowSurface, 20, WWIDTH / 2, 600, 'Press ESC to return to main screen', GREEN)
 
