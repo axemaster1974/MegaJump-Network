@@ -156,11 +156,11 @@ while True:
             (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
             continue
         if pygame.key.get_pressed()[pygame.K_F3]:
-            BACKGROUND = "background5.jpg"
+            BACKGROUND = "background6.jpg"
             (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
             continue
         if pygame.key.get_pressed()[pygame.K_F4]:
-            BACKGROUND = "background2.jpg"
+            BACKGROUND = "background5.jpg"
             (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
             continue
         if pygame.key.get_pressed()[pygame.K_F5]:
@@ -168,8 +168,29 @@ while True:
             (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
             continue
 
+        # Theme music change options
         if pygame.key.get_pressed()[pygame.K_F6]:
-            BGMUSIC = "Aurora.ogg"
+            BGMUSIC = "Two Finger Johnny.ogg"
+            pygame.mixer.music.load(BGMUSIC)
+            pygame.mixer.music.play(-1, 0.0)
+            continue
+        if pygame.key.get_pressed()[pygame.K_F7]:
+            BGMUSIC = "Passing Time.ogg"
+            pygame.mixer.music.load(BGMUSIC)
+            pygame.mixer.music.play(-1, 0.0)
+            continue
+        if pygame.key.get_pressed()[pygame.K_F8]:
+            BGMUSIC = "Mission.ogg"
+            pygame.mixer.music.load(BGMUSIC)
+            pygame.mixer.music.play(-1, 0.0)
+            continue
+        if pygame.key.get_pressed()[pygame.K_F9]:
+            BGMUSIC = "Mt Fox Shop.ogg"
+            pygame.mixer.music.load(BGMUSIC)
+            pygame.mixer.music.play(-1, 0.0)
+            continue
+        if pygame.key.get_pressed()[pygame.K_F10]:
+            BGMUSIC = "Divider.ogg"
             pygame.mixer.music.load(BGMUSIC)
             pygame.mixer.music.play(-1, 0.0)
             continue
