@@ -382,5 +382,3 @@ def savedGameScreen(savedGames, windowSurface, WWIDTH, WHEIGHT, FRAMES, backgrou
 
         clock.set_fps_limit(FRAMES)
         clock.tick()
-       
-#TODO Ensure sockets closed on exit

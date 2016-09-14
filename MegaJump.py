@@ -1,6 +1,6 @@
 ########## MEGAJUMP! #############
 
-import pygame, sys, time, random
+import pygame, sys, time, random, os
 from pygame.locals import *
 from pyglet import clock
 from gameFunc import *
@@ -10,6 +10,9 @@ from networking import *
 pygame.init()
 pygame.mixer.pre_init(44100, 16, 2, 4096)
 pygame.mixer.init()
+
+# Starts window in centre of screen
+os.environ['SDL_VIDEO_CENTERED'] = '1'
 
 # Constants
 WHITE = (255, 255, 255)
@@ -394,6 +397,8 @@ while True:
                           'colour': BLUE})
 
     # set up the window again depending on selected options
+    if WWIDTH == MWWIDTH or WWIDTH == HWWIDTH:
+        os.environ['SDL_VIDEO_CENTERED'] = '1'
     (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
 
     # Calculate y coordinate where ball should stop so rests on ground
