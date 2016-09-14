@@ -81,7 +81,7 @@ megaSound = pygame.mixer.Sound(MEGAJUMP)
 insaneWinSound = pygame.mixer.Sound(INSANEWIN)
 loseSound = pygame.mixer.Sound(LOSE)
 
-# Main Loop
+########### Main Game Loop ############
 while True:
 
     WWIDTH = 700                   # Default Window Width (can be modified by user selected options)
@@ -97,6 +97,7 @@ while True:
 
     while True:
 
+        # Only server role controls game selection in network mode
         if role == "client":
             break
 
@@ -109,7 +110,6 @@ while True:
         titleScreen(windowSurface, WWIDTH, role)
 
         # Intro ball
-        
         if iball['dir'] == "RIGHT":
             iball['x'] += 3
         else:
@@ -130,7 +130,6 @@ while True:
         pygame.draw.circle(windowSurface, GOLD, (iball['x'], iball['y']), SRADIUS, 0)
 
         # Option selection
-        
         if pygame.key.get_pressed()[ord('1')]:
             loadedGame = False
             gameSlot = None
@@ -220,6 +219,7 @@ while True:
                 pygame.quit()
                 sys.exit()
 
+        # No need for game option selections if provided by loaded game
         if loadedGame:
             break
 
@@ -273,7 +273,8 @@ while True:
 
         if loadedGame:
             break
-        
+
+        # Insane mode has fixed platform size and number
         if insane:
             break
 
@@ -316,13 +317,15 @@ while True:
 
     time.sleep(0.3)
 
-    ################# Client Wait Routine ###########################
+    ################# Client Wait Routine (Network Mode Only) ##############
 
     if role == "client":
         role = clientScreen(s, windowSurface, WWIDTH, FRAMES, background_image, background_position)
         if role == "solo":
             s.close()
             continue
+
+    ############### Server Game Start Notification to Client (Network Mode Only) ##############
 
     if role == "server":
         try:
@@ -419,7 +422,7 @@ while True:
             sendData(s, "READY")
 
 
-    ################### Main Game Loop #####################
+    ################### Main Game Play Loop #####################
     
     while True:
         
@@ -795,5 +798,3 @@ while True:
         if role == "client":
             if otherPlayerStatus == "quit":
                 break
-
-

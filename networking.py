@@ -56,7 +56,14 @@ def createServerSocket(windowSurface):
         return
 
 def acceptClientConn(s, windowSurface): # Establish connection with client.
+
     cs = None
+
+    # socket set to non blocking required so window doesn't hang and become unresponsive awaiting server
+    # instruction. Instead a loop checks each iteration for network data from client, and try / except clause means if
+    # no data received, game doesn't not crash with "non blocking socket received no data error". Instead loop continues
+    # and event pump prevents window hanging
+
     s.setblocking(0)
 
     while not cs:
@@ -166,7 +173,6 @@ def setupServer(windowSurface, background_image, background_position):
     else:
         return
 
-
 def setupClient(windowSurface, background_image, background_position):
 
     serverIP = getServerHost(windowSurface, background_image, background_position)
@@ -179,6 +185,3 @@ def setupClient(windowSurface, background_image, background_position):
         return serverSocket
     else:
         return
-
-
-
