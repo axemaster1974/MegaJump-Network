@@ -4,7 +4,7 @@ executables = [cx_Freeze.Executable("Megajump.py")]
 
 cx_Freeze.setup(
     name="MegaJump",
-    version = "1",
-    options={"build_exe": {"packages":["pyglet", "gameFunc", "pygame"]}},
+    version = "2",
+    options={"build_exe": {"packages":["pyglet", "gameFunc", "networking", "pygame"]}},
     executables = executables
     )
