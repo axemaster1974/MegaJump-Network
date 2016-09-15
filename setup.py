@@ -1,3 +1,4 @@
+# Run python setup.py build from folder containing this file and resources
 import cx_Freeze
 # Change "App" to the name of your python script
 executables = [cx_Freeze.Executable("Megajump.py")]
