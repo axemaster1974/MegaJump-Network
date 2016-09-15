@@ -798,3 +798,8 @@ while True:
         if role == "client":
             if otherPlayerStatus == "quit":
                 break
+
+#TODO Investigate switch to only transmit network data every alternate loop for slower networks in main game loop
+#TODO Update front screen to indicate network version
+#TODO Update icon to indicate network version
+#TODO Option to switch off sound
