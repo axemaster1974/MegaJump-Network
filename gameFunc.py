@@ -184,7 +184,7 @@ def titleScreen(windowSurface, WWIDTH, role):
     displayText(windowSurface, 128, WWIDTH / 2, 275, 'JUMP!', GREEN)
     displayText(windowSurface, 24, WWIDTH / 2, 450, '1 = NEW GAME', GREEN)
     displayText(windowSurface, 24, WWIDTH / 2, 500, '2 = SAVED GAMES', GREEN)
-    displayText(windowSurface, 24, WWIDTH / 2, 550, '3 = NETWORK PLAY', GREEN)
+    displayText(windowSurface, 24, WWIDTH / 2, 550, '3 = NETWORK PLAY', GOLD)
     displayText(windowSurface, 24, WWIDTH / 2, 600, '4 = INSTRUCTIONS', GREEN)
     
 def instructionScreen(windowSurface, WWIDTH, FRAMES, background_image, background_position):

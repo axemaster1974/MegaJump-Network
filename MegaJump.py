@@ -802,5 +802,3 @@ while True:
                 break
 
 #TODO Investigate switch to only transmit network data every alternate loop for slower networks in main game loop
-#TODO Update front screen to indicate network version
-#TODO Update icon to indicate network version
