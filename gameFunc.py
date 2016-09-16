@@ -165,7 +165,7 @@ def convertGameForSave(bestTime, score, WWIDTH, WHEIGHT, PWIDTH, PHEIGHT, RADIUS
 def windowSetup(WWIDTH, WHEIGHT, BACKGROUND):
     
     windowSurface = pygame.display.set_mode((WWIDTH, WHEIGHT), 0, 32)
-    pygame.display.set_caption('MegaJump')
+    pygame.display.set_caption('MegaJump Network')
     background_position = [0, 0]
     background_image = pygame.image.load(BACKGROUND).convert()
     background_image = pygame.transform.scale(background_image, (WWIDTH, WHEIGHT))
