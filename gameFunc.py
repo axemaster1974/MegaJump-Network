@@ -204,7 +204,7 @@ def instructionScreen(windowSurface, WWIDTH, FRAMES, background_image, backgroun
         displayText(windowSurface, 20, WWIDTH / 2, 450, 'Left & Right arrows to move (+ up arrow to move faster)', GREEN)
         displayText(windowSurface, 20, WWIDTH / 2, 500, 'Q to quit, R to reset, Function keys to change background & sound', GREEN)
         displayText(windowSurface, 20, WWIDTH / 2, 550, 'Only 1 MegaJump per game!', RED)
-        displayText(windowSurface, 20, WWIDTH / 2, 600, 'Press ESC to return to main screen', GREEN)
+        displayText(windowSurface, 20, WWIDTH / 2, 600, 'P to toggle music on/off. ESC to return to main screen', GREEN)
 
         pygame.draw.circle(windowSurface, GOLD, (510, 550), 10, 0)
 

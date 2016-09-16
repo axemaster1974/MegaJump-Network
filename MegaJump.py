@@ -54,6 +54,7 @@ BACKGROUND = "background1.jpg"  # Background Image
 iball = {'x': 50, 'y': 50, 'dir': "RIGHT", 'vel': 50} # Introduction ball data structure
 role = "solo"                   # Initial game role
 insane = "False"
+music = True                    # Play theme music
 
 # Ensure loadedGame and savedGames defined even if Saved Games option not selected:
 loadedGame = {} # Empty dictionary
@@ -91,7 +92,8 @@ while True:
     (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
 
     # Play music
-    pygame.mixer.music.play(-1, 0.0)
+    if music:
+        pygame.mixer.music.play(-1, 0.0)
     
     ################## Start Screen #######################
 
@@ -105,6 +107,16 @@ while True:
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+
+            # Option to switch music off or on
+            if event.type == KEYDOWN:
+                if event.key == ord('p'):
+                    if music:
+                        pygame.mixer.music.stop()
+                        music = False
+                    else:
+                        pygame.mixer.music.play(-1, 0.0)
+                        music = True
 
         windowSurface.blit(background_image, background_position)
         titleScreen(windowSurface, WWIDTH, role)
@@ -152,50 +164,40 @@ while True:
         if pygame.key.get_pressed()[pygame.K_F1]:
             BACKGROUND = "background1.jpg"
             (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
-            continue
         if pygame.key.get_pressed()[pygame.K_F2]:
             BACKGROUND = "background3.jpg"
             (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
-            continue
         if pygame.key.get_pressed()[pygame.K_F3]:
             BACKGROUND = "background6.jpg"
             (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
-            continue
         if pygame.key.get_pressed()[pygame.K_F4]:
             BACKGROUND = "background5.jpg"
             (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
-            continue
         if pygame.key.get_pressed()[pygame.K_F5]:
             BACKGROUND = "background4.jpg"
             (windowSurface, background_position, background_image) = windowSetup(WWIDTH, WHEIGHT, BACKGROUND)
-            continue
 
         # Theme music change options
         if pygame.key.get_pressed()[pygame.K_F6]:
             BGMUSIC = "Two Finger Johnny.ogg"
             pygame.mixer.music.load(BGMUSIC)
             pygame.mixer.music.play(-1, 0.0)
-            continue
         if pygame.key.get_pressed()[pygame.K_F7]:
             BGMUSIC = "Passing Time.ogg"
             pygame.mixer.music.load(BGMUSIC)
             pygame.mixer.music.play(-1, 0.0)
-            continue
         if pygame.key.get_pressed()[pygame.K_F8]:
             BGMUSIC = "Mission.ogg"
             pygame.mixer.music.load(BGMUSIC)
             pygame.mixer.music.play(-1, 0.0)
-            continue
         if pygame.key.get_pressed()[pygame.K_F9]:
             BGMUSIC = "Mt Fox Shop.ogg"
             pygame.mixer.music.load(BGMUSIC)
             pygame.mixer.music.play(-1, 0.0)
-            continue
         if pygame.key.get_pressed()[pygame.K_F10]:
             BGMUSIC = "Divider.ogg"
             pygame.mixer.music.load(BGMUSIC)
             pygame.mixer.music.play(-1, 0.0)
-            continue
 
         if role == "client":
             break
@@ -802,4 +804,3 @@ while True:
 #TODO Investigate switch to only transmit network data every alternate loop for slower networks in main game loop
 #TODO Update front screen to indicate network version
 #TODO Update icon to indicate network version
-#TODO Option to switch off sound
