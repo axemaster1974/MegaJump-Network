@@ -23,7 +23,7 @@ There is also the ability to play against an opponent on a LAN via "Network Play
 
 The project uses the pygame library (it also uses pyglet but this was purely for the clock timer, as I found this resulted in smoother play the the pygame one).
 
-I've also included a compiled executable version (using cx_Freeze) which does not require Python or libraries to be pre-installed. This can be found in the build/MegaJump Network folder. Just download the repo as a zip file then copy the MegaJump Network folder to a location which has write access (for save file), and run Megajump.exe. An ico file is included for if you want to make a shortcut on the desktop. 
+I've also included a compiled executable version (using cx_Freeze) which does not require Python or libraries to be pre-installed. This can be found in the build/MegaJump Network folder. Just download the repo as a zip file then copy the MegaJump Network folder under the build folder to a location which has write access (for save file), and run Megajump.exe. An ico file is included for if you want to make a shortcut on the desktop. 
 
 Hope you enjoy playing MegaJump!
 
