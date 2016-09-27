@@ -10,10 +10,12 @@ Each level is randomly generated, so no two levels will be the same. Some levels
 
 The controls are:-
 
-Space to jump (+ down arrow for small jump, M for MegaJump) - Only 1 MegaJump per game!
-Left & Right arrows to move (+ up arrow to move faster)
-Q to quit, R to reset, Function keys to change background & sound (F1-F5 changes background, F6-F10 changes music)
-P to toggle music on/off
+* Space to jump (+ down arrow for small jump, M for MegaJump) - Only 1 MegaJump per game!
+* Left & Right arrows to move (+ up arrow to move faster)
+* Q to quit
+* R to reset
+* Function keys to change background & sound (F1-F5 changes background, F6-F10 changes music)
+* P to toggle music on/off
 
 (NOTE: There is a "feature", which was originally a bug, but which I kept as it actually allows you complete levels that may otherwise be impossible. If you jump on a platform and keep moving, when you fall off, you can let go of the left or right key and you will drop straight down. However if you stop on the platform, then fall off, you will fall off sideways)
 
