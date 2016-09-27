@@ -117,7 +117,7 @@ def saveGames(windowSurface, WWIDTH, WHEIGHT, savedGame, savedGames, gameSlot, m
 
     if savedGames:
         numberSavedGames = len(savedGames)
-        if numberSavedGames >= 9:
+        if numberSavedGames >= 9 and gameSlot == None:
             mode = "Maxed"
     else:
         numberSavedGames = 0
@@ -140,7 +140,10 @@ def saveGames(windowSurface, WWIDTH, WHEIGHT, savedGame, savedGames, gameSlot, m
     file.close()
 
     if mode == "Save":
-        return "Game Saved"   
+        if len(savedGames) == 9:
+            return "Game Saved, no more save slots available"
+        else:
+            return "Game Saved"
 
     if mode == "Delete":
         return "Game Deleted"
